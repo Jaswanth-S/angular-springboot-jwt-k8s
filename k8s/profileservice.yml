@@ -1,0 +1,60 @@
+#Create a deployment by using the image pushed to Docker Hub
+#containerPort has to be 8081
+#while creating the deployment, get the values from ConfigMap and secret and follow the below instructions
+#Use the name as `MYSQL_URL` for the key which has to accessed from ConfigMap, which is used in the SpringBoot application
+#Use the names as follows `MYSQL_USERNAME` - username, `MYSQL_PASSWORD` - password for the values access from secret
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: profileservice-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8.stackroute: profileservice-deployment
+  template:
+    metadata:
+      labels:
+        k8.stackroute: profileservice-deployment
+    spec:
+      containers:
+        - name: sb-profileservice
+          image: jaswanth1234/sb-profileservice:3.0
+          env:
+            - name: MYSQL_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: sb-config
+                  key: mysql_url
+            - name: MYSQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysqlsecret
+                  key: mysql_username
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysqlsecret
+                  key: mysql_password
+          ports:
+            - containerPort: 8082
+---
+#Create the service of type LoadBalancer and use the above created deployment as selector
+#port should be 8081
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: profileservice-service
+  labels:
+    app: profileservice-service
+spec:
+  type: NodePort
+  ports:
+    - nodePort: 31200
+      port: 8082
+      targetPort: 8082
+  selector:
+    k8.stackroute: profileservice-deployment
+

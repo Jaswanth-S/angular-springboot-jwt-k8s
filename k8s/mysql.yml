@@ -1,0 +1,91 @@
+#Define Persistent Volumes object named 'mysql-volume'
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-volume
+  labels:
+    type: local
+spec:
+  storageClassName: mysql-class
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/mysql"
+---
+#  Define a Persistent Volume Claim named `mysql-claim` that can be used by a Pod to gain access to the Persistent Volumes
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-claim
+spec:
+  storageClassName: mysql-class
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+#Define a deployment named `mysql` by using the latest mysql image from Docker Hub
+#and the container port should be 3306.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app: sbservice
+spec:
+  selector:
+    matchLabels:
+      app: sbservice
+      tier: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sbservice
+        tier: backend
+    spec:
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-claim
+      restartPolicy: Always
+      containers:
+        - name: mysql
+          image: mysql:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: "/var/lib/mysql"
+              name: mysql-storage
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysqlsecret
+                  key: mysql_root_password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: sb-config
+                  key: mysql_database
+          ports:
+            - containerPort: 3306
+---
+#Define a service named `mysql` of type ClusterIP and use the above created deployment as selector
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  labels:
+    app: sbservice
+    tier: backend
+spec:
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    app: sbservice
+    tier: backend
+

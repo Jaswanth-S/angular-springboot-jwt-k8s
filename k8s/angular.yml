@@ -1,0 +1,41 @@
+#Create a deployment by using the image pushed to Docker Hub
+#containerPort has to be 4200
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: angular-deployment
+  labels:
+    app: angular-deployment
+spec:
+  selector:
+    matchLabels:
+      app: angular-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: angular-deployment
+    spec:
+      containers:
+        - name: angularfrontend-ui
+          image: jaswanth1234/angular-jwt-ui:2.0
+          ports:
+            - containerPort: 4200
+---
+#Create the service of type LoadBalancer and use the created deployment as selector
+# port should be 4200
+apiVersion: v1
+kind: Service
+metadata:
+  name: angular-service
+  labels:
+    app: angular-service
+spec:
+  type: NodePort
+  ports:
+    - nodePort: 31001
+      port: 4200
+      targetPort: 4200
+  selector:
+    app: angular-deployment
+

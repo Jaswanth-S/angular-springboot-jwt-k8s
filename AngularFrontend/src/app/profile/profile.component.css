@@ -1,0 +1,17 @@
+
+.table-responsive{
+    padding-top: 13.5rem;
+    margin: auto;
+    text-align: -webkit-center;
+    padding-bottom: 5rem;
+}
+table{
+    border: 0.14rem solid ;
+    width: 54%;
+}
+tr,td{
+    text-align: center;
+}
+.alert{
+    width: 50%;
+}

@@ -1,0 +1,29 @@
+<!-- header starts -->
+
+<div id="header">
+    <ul class="topnav" routerLinkActive="active">
+      <li>
+      <a href="/login" >Home</a>
+    </li> 
+      <li *ngIf="showUserBoard">
+        <a href="/updateprofile" routerLink="updateprofile">Update Profile</a>
+      </li>
+      <li *ngIf="showUserBoard">
+        <a href="/profile" routerLink="profile">View Profile</a>
+      </li>  
+      <li *ngIf="!isLoggedIn" class="right">
+        <a href="/register"  routerLink="register">Sign Up</a>
+      </li>
+      <li *ngIf="!isLoggedIn" class="right">
+        <a href="/login"  routerLink="login">Login</a>
+      </li>
+      <li  class="right" *ngIf="isLoggedIn">
+        <a href   (click)="logout()">LogOut</a>
+      </li>
+    </ul>
+  </div>
+  <!-- header ends -->
+
+
+
+
